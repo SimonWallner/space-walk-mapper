@@ -99,7 +99,7 @@ var mapTile = function(json) {
 		.attr('y', -(json.y + json.height))
 		.attr('width', json.width)
 		.attr('height', json.height)
-		.attr('xlink:href', 'data:' + json.type + ', ' + json.data);
+		.attr('xlink:href', 'data:' + json.mime + ';' + json.encoding + ', ' + json.data);
 	
 	mapTileRequested = false;
 	currentTile = json;
@@ -107,16 +107,16 @@ var mapTile = function(json) {
 	// debug output
 	d3.select('#image img').remove();
 	d3.select('#image').append('img')
-		.attr('src', 'data:' + json.type + ', ' + json.data);
+		.attr('src', 'data:' + json.mime + ';' + json.encoding + ', ' + json.data);
 }
 
 libsw.onMessage = function(message) {
 	var sample = message;
 	
-	if (sample.type === "mapTile") {
+	if (sample.type === "ext.simpleTelemetry.mapTileData") {
 		mapTile(sample.payload);
 		return;
-	} else if (sample.type === "position") {
+	} else if (sample.type === "ext.simpleTelemetry.location") {
 	
 		data[0].push(sample.payload);
 		latestData.push(sample.payload);
@@ -333,11 +333,8 @@ window.onload = function() {
 
 var requestMapTile = function(rect) {
 	var message = {
-		type: 'message',
-		payload: {
-			type: 'mapTileRequest',
-			payload: rect
-		}
+		type: 'ext.simpleTelemetry.mapTileRequest',
+		payload: rect
 	}
 	libsw.postMessage(message);
 }
